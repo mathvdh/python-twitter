@@ -2224,6 +2224,10 @@ class Api(object):
     self._oauth_consumer = None
     self._shortlink_size = 19
 
+    self._XRL_Limit = None
+    self._XRL_Remaining = None
+    self._XRL_Reset = None
+
     self._InitializeRequestHeaders(request_headers)
     self._InitializeUserAgent()
     self._InitializeDefaultParameters()
@@ -3893,6 +3897,18 @@ class Api(object):
     if 'errors' in data:
       raise TwitterError(data['errors'])
 
+
+  def GetLastRateLimits(response):
+    return  { "Limit":self._XRL_Limit,
+              "Remaining":self._XRL_Remaining,
+              "Reset":self._XRL_Reset,
+              }
+
+  def _ExtractXLimits(response):
+    self._XRL_Limit = response.headers.get('X-Rate-Limit-Limit', None)
+    self._XRL_Remaining = response.headers.get('X-Rate-Limit-Remaining', None)
+    self._XRL_Reset = response.headers.get('X-Rate-Limit-Reset', None)
+
   def _FetchUrl(self,
                 url,
                 post_data=None,
@@ -3990,6 +4006,7 @@ class Api(object):
     # Open and return the URL immediately if we're not going to cache
     if encoded_post_data or no_cache or not self._cache or not self._cache_timeout:
       response = opener.open(url, encoded_post_data)
+      self._ExtractXLimits(response)
       url_data = self._DecompressGzippedResponse(response)
       opener.close()
     else:
@@ -4006,6 +4023,7 @@ class Api(object):
       if not last_cached or time.time() >= last_cached + self._cache_timeout:
         try:
           response = opener.open(url, encoded_post_data)
+          self._ExtractXLimits(response)
           url_data = self._DecompressGzippedResponse(response)
           self._cache.Set(key, url_data)
         except urllib2.HTTPError, e:
