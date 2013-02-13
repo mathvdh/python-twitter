@@ -3909,6 +3909,11 @@ class Api(object):
     self._XRL_Remaining = response.headers.get('X-Rate-Limit-Remaining', None)
     self._XRL_Reset = response.headers.get('X-Rate-Limit-Reset', None)
 
+    print "XRL_Limit : "+str(self._XRL_Limit)
+    print "XRL_Remaining : "+str(self._XRL_Remaining)
+    print "XRL_Remaining : "+str(self._XRL_Reset)
+    
+
   def _FetchUrl(self,
                 url,
                 post_data=None,
