@@ -3898,13 +3898,13 @@ class Api(object):
       raise TwitterError(data['errors'])
 
 
-  def GetLastRateLimits(response):
+  def GetLastRateLimits(self,response):
     return  { "Limit":self._XRL_Limit,
               "Remaining":self._XRL_Remaining,
               "Reset":self._XRL_Reset,
               }
 
-  def _ExtractXLimits(response):
+  def _ExtractXLimits(self,response):
     self._XRL_Limit = response.headers.get('X-Rate-Limit-Limit', None)
     self._XRL_Remaining = response.headers.get('X-Rate-Limit-Remaining', None)
     self._XRL_Reset = response.headers.get('X-Rate-Limit-Reset', None)
