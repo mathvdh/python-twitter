@@ -3905,8 +3905,8 @@ class Api(object):
               }
 
   def _ExtractXLimits(self,response):
-    print response
-    
+    print response.headers
+
     self._XRL_Limit = response.headers.get('X-Rate-Limit-Limit', None)
     self._XRL_Remaining = response.headers.get('X-Rate-Limit-Remaining', None)
     self._XRL_Reset = response.headers.get('X-Rate-Limit-Reset', None)
@@ -4013,8 +4013,9 @@ class Api(object):
     # Open and return the URL immediately if we're not going to cache
     if encoded_post_data or no_cache or not self._cache or not self._cache_timeout:
       response = opener.open(url, encoded_post_data)
-      self._ExtractXLimits(response)
+      
       url_data = self._DecompressGzippedResponse(response)
+      self._ExtractXLimits(response)
       opener.close()
     else:
       # Unique keys are a combination of the url and the oAuth Consumer Key
@@ -4030,8 +4031,9 @@ class Api(object):
       if not last_cached or time.time() >= last_cached + self._cache_timeout:
         try:
           response = opener.open(url, encoded_post_data)
-          self._ExtractXLimits(response)
+          
           url_data = self._DecompressGzippedResponse(response)
+          self._ExtractXLimits(response)
           self._cache.Set(key, url_data)
         except urllib2.HTTPError, e:
           print e
