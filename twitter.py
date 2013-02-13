@@ -2618,6 +2618,23 @@ class Api(object):
                       trim_user=None,
                       include_entities=None,
                       exclude_replies=None):
+
+    data = self.GetUserTimelineDICT(id,user_id,screen_name,since_id,max_id,count,page,include_rts,trim_user,include_entities,exclude_replies)
+
+    return [Status.NewFromJsonDict(x) for x in data]
+
+  def GetUserTimelineDICT(self,
+                      id=None,
+                      user_id=None,
+                      screen_name=None,
+                      since_id=None,
+                      max_id=None,
+                      count=None,
+                      page=None,
+                      include_rts=None,
+                      trim_user=None,
+                      include_entities=None,
+                      exclude_replies=None):
     '''Fetch the sequence of public Status messages for a single user.
 
     The twitter.Api instance must be authenticated if the user is private.
@@ -2723,7 +2740,7 @@ class Api(object):
 
     json = self._FetchUrl(url, parameters=parameters)
     data = self._ParseAndCheckTwitter(json)
-    return [Status.NewFromJsonDict(x) for x in data]
+    return data
 
   def GetStatus(self, id, include_entities=None):
     '''Returns a single status message.
