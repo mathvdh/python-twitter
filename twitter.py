@@ -3905,6 +3905,8 @@ class Api(object):
               }
 
   def _ExtractXLimits(self,response):
+    print response
+    
     self._XRL_Limit = response.headers.get('X-Rate-Limit-Limit', None)
     self._XRL_Remaining = response.headers.get('X-Rate-Limit-Remaining', None)
     self._XRL_Reset = response.headers.get('X-Rate-Limit-Reset', None)
