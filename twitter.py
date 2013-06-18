@@ -2718,12 +2718,11 @@ class Api(object):
                       trim_user=None,
                       exclude_replies=None):
 
-    data = self.GetUserTimelineDICT(id,user_id,screen_name,since_id,max_id,count,page,include_rts,trim_user,include_entities,exclude_replies)
+    data = self.GetUserTimelineDICT(user_id,screen_name,since_id,max_id,count,page,include_rts,trim_user,include_entities,exclude_replies)
 
     return [Status.NewFromJsonDict(x) for x in data]
 
   def GetUserTimelineDICT(self,
-                      id=None,
                       user_id=None,
                       screen_name=None,
                       since_id=None,
