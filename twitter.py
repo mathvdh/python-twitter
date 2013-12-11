@@ -3214,6 +3214,7 @@ class Api(object):
       parameters['skip_status'] = True
     if include_user_entities:
       parameters['include_user_entities'] = True
+
     while True:
       parameters['cursor'] = cursor
       json = self._FetchUrl(url, parameters=parameters)
@@ -3345,7 +3346,8 @@ class Api(object):
           break
       return result
 
-  def GetFollowers(self, user_id=None, screen_name=None, cursor=-1, skip_status=False, include_user_entities=False):
+
+  def GetFollowers(self, user_id=None, screen_name=None, cursor=-1, skip_status=False, include_user_entities=False, rate_limit=350, count=None):
     '''Fetch the sequence of twitter.User instances, one for each follower
 
     The twitter.Api instance must be authenticated.
@@ -3369,6 +3371,8 @@ class Api(object):
     Returns:
       A sequence of twitter.User instances, one for each follower
     '''
+
+    rate_check = 1
     if not self._oauth_consumer:
       raise TwitterError("twitter.Api instance must be authenticated")
     url = '%s/followers/list.json' % self.base_url
@@ -3382,6 +3386,12 @@ class Api(object):
       parameters['skip_status'] = True
     if include_user_entities:
       parameters['include_user_entities'] = True
+    if count:
+      try:
+        parameters['count'] = int(count)
+      except:
+        raise TwitterError("count must be an integer")
+
     while True:
       parameters['cursor'] = cursor
       json = self._FetchUrl(url, parameters=parameters)
@@ -3394,7 +3404,83 @@ class Api(object):
           cursor = data['next_cursor']
       else:
         break
+      print  rate_check
+      if rate_check == rate_limit:
+         break
+      else:
+         rate_check += 1
     return result
+
+
+  def GetFollowersDict(self, user_id=None, screen_name=None, cursor=-1, skip_status=False, include_user_entities=False, rate_limit=350, count=None):
+    '''Fetch the sequence of twitter.User instances, one for each follower
+
+    The twitter.Api instance must be authenticated.
+
+    Args:
+      user_id:
+        The twitter id of the user whose followers you are fetching.
+        If not specified, defaults to the authenticated user. [Optional]
+      screen_name:
+        The twitter name of the user whose followers you are fetching.
+        If not specified, defaults to the authenticated user. [Optional]
+      cursor:
+        Should be set to -1 for the initial call and then is used to
+        control what result page Twitter returns [Optional(ish)]
+      skip_status:
+        If True the statuses will not be returned in the user items.
+        [Optional]
+      include_user_entities:
+        When True, the user entities will be included.
+
+    Returns:
+      A sequence of twitter.User instances, one for each follower
+    '''
+
+    rate_check = 1
+    if not self._oauth_consumer:
+      raise TwitterError("twitter.Api instance must be authenticated")
+    url = '%s/followers/list.json' % self.base_url
+    result = []
+    parameters = {}
+    if user_id is not None:
+      parameters['user_id'] = user_id
+    if screen_name is not None:
+      parameters['screen_name'] = screen_name
+    if skip_status:
+      parameters['skip_status'] = True
+    if include_user_entities:
+      parameters['include_user_entities'] = True
+    if count:
+      try:
+        parameters['count'] = int(count)
+      except:
+        raise TwitterError("count must be an integer")
+
+    while True:
+      parameters['cursor'] = cursor
+      json = self._FetchUrl(url, parameters=parameters)
+      data = self._ParseAndCheckTwitter(json)
+      # result += [User.NewFromJsonDict(x) for x in data['users']]
+      if 'next_cursor' in data:
+        if data['next_cursor'] == 0 or data['next_cursor'] == data['previous_cursor']:
+          break
+        else:
+          cursor = data['next_cursor']
+      else:
+        break
+      print  rate_check
+      if rate_check == rate_limit:
+         break
+      else:
+         rate_check += 1
+    return data
+
+
+
+
+
+
 
   def UsersLookup(self, user_id=None, screen_name=None, users=None, include_entities=True):
     '''Fetch extended information for the specified users.
